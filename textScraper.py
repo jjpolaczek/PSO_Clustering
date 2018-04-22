@@ -8,6 +8,7 @@ from optparse import OptionParser
 
 from vectorizer import TextVectorizer
 
+from sklearn.cluster import KMeans, MiniBatchKMeans
 #Topic: Clasterization of a large set of textual documents by means of a meta-heuristic Particle Swarm Optimization
 
 logger = logging.getLogger(__name__)
@@ -21,8 +22,26 @@ def main(opts):
     englishBooks = bookLib.filterBooks("English", onlyWithSubject=True)
     logger.info("Processing %d books" % len(englishBooks))
     vectoriser = TextVectorizer(englishBooks, opts)
-    vectoriser.process()
+    englishBooks,featureVector = vectoriser.process()
 
+    nc = 10
+    ##Attempt Kmeans clustering
+    if opts.minibatch:
+        km = MiniBatchKMeans(n_clusters=nc, init='k-means++', n_init=1,
+                             init_size=1000, batch_size=1000, verbose=opts.verbose)
+    else:
+        km = KMeans(n_clusters=nc, init='k-means++', max_iter=100, n_init=1,
+                    verbose=opts.verbose)
+    print("Clustering sparse data with %s" % km)
+    t0 = time()
+    labels = km.fit_predict(featureVector)
+    print("done in %0.3fs" % (time() - t0))
+    print(labels)
+    for i in range(nc):
+        print "LABEL %d" % i
+        for j in range(len(labels)):
+            if labels[j] == i:
+                print englishBooks[j].subject
 
 
 

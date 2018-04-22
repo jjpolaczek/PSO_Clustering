@@ -46,7 +46,7 @@ class TextVectorizer():
                                          use_idf=self.opts.use_idf)
 
 
-        X = vectorizer.fit_transform(self.bookList[0:100])
+        X = vectorizer.fit_transform(self.bookList[0:1000])
         logger.info("done in %fs", (time() - t0))
         logger.info("n_samples: %d, n_features: %d\n" % X.shape)
         if self.opts.n_components:
@@ -66,9 +66,9 @@ class TextVectorizer():
             explained_variance = svd.explained_variance_ratio_.sum()
             logger.info("Explained variance of the SVD step: %d\n", int(explained_variance * 100))
 
-        vectorisedData = (self.bookList[0:100], X)
+        vectorisedData = (self.bookList[0:1000], X)
         with open(self.tmpVectorisedFile, 'wb') as f:
             pickle.dump(vectorisedData, f, pickle.HIGHEST_PROTOCOL)
 
-        print type(X)
-        print X.shape
+        logger.info("Extracted feature vector of %d dimensions, shape: %s", X.shape[1], X.shape)
+        return vectorisedData
