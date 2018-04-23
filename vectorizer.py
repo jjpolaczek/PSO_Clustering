@@ -22,7 +22,8 @@ class TextVectorizer():
     def __init__(self, bookList, opts):
         self.opts=opts
         self.bookList=bookList
-        self.tmpVectorisedFile = "vectorised.pickle"
+        self.tmpVectorisedFile1 = "vectorised1.pickle"
+        self.tmpVectorisedFile2 = "vectorised2.pickle"
 
     def process(self):
         # Vectorizer settings
@@ -46,9 +47,16 @@ class TextVectorizer():
                                          use_idf=self.opts.use_idf)
 
 
-        X = vectorizer.fit_transform(self.bookList[0:1000])
+        X = vectorizer.fit_transform(self.bookList)
         logger.info("done in %fs", (time() - t0))
         logger.info("n_samples: %d, n_features: %d\n" % X.shape)
+        logger.info("Saving feature vector to %s\n" % self.tmpVectorisedFile1)
+
+        vectorisedData = (self.bookList, X)
+
+        with open(self.tmpVectorisedFile1, 'wb') as f:
+            pickle.dump(vectorisedData, f, pickle.HIGHEST_PROTOCOL)
+
         if self.opts.n_components:
             logger.info("Performing dimensionality reduction using LSA")
             t0 = time()
@@ -66,9 +74,16 @@ class TextVectorizer():
             explained_variance = svd.explained_variance_ratio_.sum()
             logger.info("Explained variance of the SVD step: %d\n", int(explained_variance * 100))
 
-        vectorisedData = (self.bookList[0:1000], X)
-        with open(self.tmpVectorisedFile, 'wb') as f:
-            pickle.dump(vectorisedData, f, pickle.HIGHEST_PROTOCOL)
+            logger.info("Saving LSA output vector to %s\n" % self.tmpVectorisedFile2)
+            vectorisedData = (self.bookList, X)
+            with open(self.tmpVectorisedFile2, 'wb') as f:
+                pickle.dump(vectorisedData, f, pickle.HIGHEST_PROTOCOL)
+
+
 
         logger.info("Extracted feature vector of %d dimensions, shape: %s", X.shape[1], X.shape)
         return vectorisedData
+    def loadCheckpoint(self):
+        with open(self.tmpVectorisedFile2, 'rb') as f:
+            obj = pickle.load(f)
+        return obj

@@ -5,7 +5,6 @@ import logging
 import sys
 from time import time
 from optparse import OptionParser
-
 from vectorizer import TextVectorizer
 
 from sklearn.cluster import KMeans, MiniBatchKMeans
@@ -22,9 +21,10 @@ def main(opts):
     englishBooks = bookLib.filterBooks("English", onlyWithSubject=True)
     logger.info("Processing %d books" % len(englishBooks))
     vectoriser = TextVectorizer(englishBooks, opts)
-    englishBooks,featureVector = vectoriser.process()
 
-    nc = 10
+    #englishBooks,featureVector = vectoriser.process()
+    englishBooks, featureVector = vectoriser.loadCheckpoint()
+    nc = 100
     ##Attempt Kmeans clustering
     if opts.minibatch:
         km = MiniBatchKMeans(n_clusters=nc, init='k-means++', n_init=1,
@@ -32,16 +32,32 @@ def main(opts):
     else:
         km = KMeans(n_clusters=nc, init='k-means++', max_iter=100, n_init=1,
                     verbose=opts.verbose)
-    print("Clustering sparse data with %s" % km)
+    logger.info("Clustering sparse data with %s" % km)
     t0 = time()
     labels = km.fit_predict(featureVector)
-    print("done in %0.3fs" % (time() - t0))
-    print(labels)
+    logger.info("done in %0.3fs" % (time() - t0))
+    #print(labels)
+    subjects = []
     for i in range(nc):
-        print "LABEL %d" % i
+        print "\n\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXx  LABEL %d\n" % i
+
+        tmpset = {}
         for j in range(len(labels)):
             if labels[j] == i:
-                print englishBooks[j].subject
+                for l in englishBooks[j].subject:
+                    try:
+                        tmpval = tmpset[l]
+                        tmpset[l] = tmpval + 1
+                    except KeyError:
+                        tmpset[l] = 1
+        subjects.append(tmpset)
+        for key in tmpset:
+            print "%s -- %d" % (key, tmpset[key])
+    with open("result.txt", 'w') as f:
+        for i in range(nc):
+            f.write("\n\n\nXXXXXXXXXXXXXXXXXXXXXXXXXXx  LABEL %d\n" % i)
+            for key in subjects[i]:
+                f.write("%s -- %d\n" % (key, subjects[i][key]))
 
 
 
