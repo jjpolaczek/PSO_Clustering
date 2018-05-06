@@ -22,8 +22,8 @@ def main(opts):
     logger.info("Processing %d books" % len(englishBooks))
     vectoriser = TextVectorizer(englishBooks, opts)
 
-    #englishBooks,featureVector = vectoriser.process()
-    englishBooks, featureVector = vectoriser.loadCheckpoint()
+    englishBooks,featureVector = vectoriser.process()
+    #englishBooks, featureVector = vectoriser.loadCheckpoint()
     nc = 100
     ##Attempt Kmeans clustering
     if opts.minibatch:
@@ -77,9 +77,6 @@ if __name__ == '__main__':
     op.add_option("--no-idf",
                   action="store_false", dest="use_idf", default=True,
                   help="Disable Inverse Document Frequency feature weighting.")
-    op.add_option("--use-hashing",
-                  action="store_true", default=True,
-                  help="Use a hashing feature vectorizer")
     op.add_option("--n-features", type=int, default=10000,
                   help="Maximum number of features (dimensions)"
                        " to extract from text.")

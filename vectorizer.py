@@ -29,20 +29,8 @@ class TextVectorizer():
         # Vectorizer settings
         logger.info("Extracting features from the training dataset using a sparse vectorizer")
         t0 = time()
-        if self.opts.use_hashing:
-            if self.opts.use_idf:
-                # Perform an IDF normalization on the output of HashingVectorizer
-                hasher = HashingVectorizer(n_features=self.opts.n_features,
-                                           stop_words='english', alternate_sign=False,
-                                           norm=None, binary=False)
-                vectorizer = make_pipeline(hasher, TfidfTransformer())
-            else:
-                vectorizer = HashingVectorizer(n_features=self.opts.n_features,
-                                               stop_words='english',
-                                               alternate_sign=False, norm='l2',
-                                               binary=False)
-        else:
-            vectorizer = TfidfVectorizer(max_df=0.5, max_features=self.opts.n_features,
+
+        vectorizer = TfidfVectorizer(max_df=0.5, max_features=self.opts.n_features,
                                          min_df=2, stop_words='english',
                                          use_idf=self.opts.use_idf)
 
