@@ -6,7 +6,7 @@ import sys
 from time import time
 from optparse import OptionParser
 from vectorizer import TextVectorizer
-
+from clusterizer import PSO_Clusterizer
 from sklearn.cluster import KMeans, MiniBatchKMeans
 #Topic: Clasterization of a large set of textual documents by means of a meta-heuristic Particle Swarm Optimization
 
