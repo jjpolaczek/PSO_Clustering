@@ -19,5 +19,5 @@ with open("vectorised2.pickle", 'rb') as f:
 englishBooks, featureVector = obj
 
 print type(featureVector)
-result = PSO_Clusterizer.clusterize(featureVector, 10)
+result = PSO_Clusterizer.clusterize(featureVector, no_clusters=10, t_max=5)
 print result

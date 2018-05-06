@@ -38,7 +38,7 @@ class PSO_Clusterizer():
         no_dims = dataset.shape[1]
         no_data = dataset.shape[0]
         if no_particles is None:
-            no_particles = 4 * no_dims
+            no_particles = 4 * no_dims * no_clusters
         #ensure data is normalized 0-1
         minVal = np.amin(dataset)
         maxVal = np.amax(dataset)
@@ -50,7 +50,7 @@ class PSO_Clusterizer():
         #create temporary euclidean dist representation
         eDist=np.zeros((no_data, no_clusters))
         tmpAsign = np.zeros((no_data, 1))
-        print "Created %d, %d dimensional particles of %d clusters" % (no_particles, no_dims, no_clusters)
+        print "Created %d, %d dimensional particles of %d clusters (%d dimensional problem)" % (no_particles, no_dims, no_clusters, no_dims * no_clusters)
 
         ##Particle temporary parameters
         w = 0.9
