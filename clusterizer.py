@@ -26,7 +26,6 @@ class PSO_Clusterizer():
             if cluster not in assignmentStats:
                 #Cluster is empty penalty
                 fitness += clusterPerf[cluster] * 10
-                break
             else:
                 fitness += clusterPerf[cluster] / assignmentStats[cluster]
 
