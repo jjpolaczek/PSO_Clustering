@@ -52,15 +52,20 @@ class PSO_Clusterizer():
         print "Created %d, %d dimensional particles of %d clusters (%d dimensional problem)" % (no_particles, no_dims, no_clusters, no_dims * no_clusters)
 
         ##Particle temporary parameters
+        #particle weight w
         w = 0.9
-        c1=2.05
-        c2=2.05
+        # individual coefficient (local)
+        c1=0.6
+        # social coefficient (global)
+        c2=0.5
         prevV=np.zeros((no_particles, no_clusters, no_dims))
         pBest=np.zeros((no_particles, no_clusters, no_dims))
         pBest_val = no_particles * [float("inf")]
         gBest= np.random.rand(no_clusters, no_dims)
         gBest_val = float("inf")
         fitness=np.zeros(no_particles)
+
+        last_score = float("inf")
         # Main loop algorithm iteration:
         for iteration in xrange(t_max):
             print "Iteration %d/%d" % (iteration, t_max)
@@ -86,17 +91,25 @@ class PSO_Clusterizer():
             gbest_idx = np.argmin(fitness, axis=-1)
             if fitness[gbest_idx] < gBest_val:
                 gBest_val = fitness[gbest_idx]
-                gBest=particles[i, :, :]
+                gBest=particles[gbest_idx, :, :]
 
             #update particle velocity and position
             for i in xrange(no_particles):
                 # Three components: 1: weight times previous velocity, 2: local optimum heuristic, 3: global optimum heuristic
                 prevV[i, :, :] = w*prevV[i, :, :] + c1*np.random.rand()*(pBest[i, :, :]-particles[i, :, :]) + c2*np.random.rand()*(gBest-particles[i, :, :])
+                #print prevV[i, :, :]
                 particles[i, :, :] += prevV[i, :, :]
 
             #update inertia cofficient linearly
-            w = 0.4 + float(t_max - iteration) * 0.5
+            w = 0.4 + float(t_max - iteration)/t_max * 0.5
             print "Fitness: ", gBest_val
+            #convergence criteria logic:
+            if last_score != float("inf"):
+                pChange = (last_score - gBest_val) / gBest_val
+                if pChange < 0.01:
+                    print "Convergence criteria reached"
+                    break
+            last_score=gBest_val
 
         # get best particle asignments
         best_particle = particles[gbest_idx, :, :]
@@ -110,5 +123,8 @@ class PSO_Clusterizer():
         rdict = dict(zip(unique, counts))
         print rdict
         print "Best Fitness: ", gBest_val
+        if no_dims < 10:
+            print "\nCluster coordinates:"
+            print gBest*(maxVal-minVal) + minVal
         return result
             #Check end condition
