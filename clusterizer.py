@@ -2,7 +2,7 @@ import numpy as np
 import os
 import pickle
 import logging
-
+import time
 logger = logging.getLogger(__name__)
 
 class PSO_Clusterizer():
@@ -66,13 +66,16 @@ class PSO_Clusterizer():
         fitness=np.zeros(no_particles)
 
         last_score = float("inf")
+        no_stalls=0
         # Main loop algorithm iteration:
         for iteration in xrange(t_max):
             print "Iteration %d/%d" % (iteration, t_max)
+
             for i in xrange(no_particles):
                 particle = particles[i,:,:]
 
                 # calculate the Euclidean distance for all centroids
+                #eDist[:,:] = np.sqrt(np.sum(np.power(dataset[:, None, :] - particle[None, :, :], 2), axis=-1))
                 for c in xrange(no_clusters):
                     eDist[:, c] = np.linalg.norm(particle[c, :] - dataset, axis=-1)
 
@@ -80,11 +83,11 @@ class PSO_Clusterizer():
                 tmpAsign = np.argmin(eDist, axis=-1)
                 # Calculate overall fitness of the particle
                 fitness[i] = PSO_Clusterizer._fitness(eDist, particle, tmpAsign)
+
                 # Save best cognitive particle
                 if fitness[i] < pBest_val[i]:
                     pBest_val[i] = fitness[i]
                     pBest[i, :, :] = particle
-
             #Handle update of all particles positions
 
             # get best global value
@@ -107,8 +110,10 @@ class PSO_Clusterizer():
             if last_score != float("inf"):
                 pChange = (last_score - gBest_val) / gBest_val
                 if pChange < 0.01:
-                    print "Convergence criteria reached"
-                    break
+                    no_stalls += 1
+                    if no_stalls > 2:
+                        print "Convergence criteria reached"
+                        break
             last_score=gBest_val
 
         # get best particle asignments
@@ -126,5 +131,5 @@ class PSO_Clusterizer():
         if no_dims < 10:
             print "\nCluster coordinates:"
             print gBest*(maxVal-minVal) + minVal
-        return result
+        return result, gBest_val, gBest
             #Check end condition

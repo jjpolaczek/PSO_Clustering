@@ -8,6 +8,9 @@ from vectorizer import TextVectorizer
 from clusterizer import PSO_Clusterizer
 
 import numpy as np
+import time
+
+import numpy as np
 
 
 logger = logging.getLogger(__name__)
@@ -62,5 +65,54 @@ def testHard():
             for key in subjects[i]:
                 f.write("%s -- %d\n" % (key, subjects[i][key]))
 
+def preCluster(min_c, max_c):
+    points=max_c-min_c + 1
+    html_dir_path="./books/indexes"
+    library_listing_file="library_listing.pickle"
+    with open("vectorised2.pickle", 'rb') as f:
+        obj = pickle.load(f)
+    englishBooks, featureVector = obj
+
+    labels=np.zeros((points, featureVector.shape[0]))
+    fitness=[]
+    clusters=[]
+    i=0
+    for nc in range(min_c, max_c + 1, 1):
+        print "Clustering for %d clusters" % nc
+        labels[i,:], fit, clst= PSO_Clusterizer.clusterize(featureVector, no_clusters=nc, t_max=20)
+        fitness.append((nc,float(fit)))
+        clusters.append(clst)
+        i += 1
+
+    with open("clusteringPSO_labs.pickle", 'wb') as f:
+        pickle.dump(labels, f, pickle.HIGHEST_PROTOCOL)
+    with open("clusteringPSO_fitness.pickle", 'wb') as f:
+        pickle.dump(fitness, f, pickle.HIGHEST_PROTOCOL)
+    with open("clusteringPSO_clusters.pickle", 'wb') as f:
+        pickle.dump(clusters, f, pickle.HIGHEST_PROTOCOL)
+
+def testTmp():
+    no_particles=50000
+    no_clsters = 25
+    no_dims = 50
+    prevV = np.random.rand(no_particles, no_clsters, no_dims)
+    gBest = np.random.rand(no_clsters, no_dims)
+    pBest = np.random.rand(no_particles, no_clsters, no_dims)
+    particles = np.random.rand(no_particles, no_clsters, no_dims)
+    w = 0.9
+    c1 = 0.5
+    c2 = 0.7
+    t0 = time.time()
+    for i in xrange(no_particles):
+        # Three components: 1: weight times previous velocity, 2: local optimum heuristic, 3: global optimum heuristic
+        prevV[i, :, :] = w * prevV[i, :, :] + c1 * np.random.rand() * (
+                    pBest[i, :, :] - particles[i, :, :]) + c2 * np.random.rand() * (gBest - particles[i, :, :])
+        # print prevV[i, :, :]
+        particles[i, :, :] += prevV[i, :, :]
+
+
+    print "DT: ", time.time()-t0
 #testSimple()
 testHard()
+#testTmp()
+#preCluster(1,25)
