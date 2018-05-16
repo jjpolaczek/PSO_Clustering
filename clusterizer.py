@@ -5,6 +5,13 @@ import logging
 import time
 logger = logging.getLogger(__name__)
 
+
+class PSO_Result():
+    def __init__(self, labels, fitness, clusters):
+        self.labels = labels
+        self.fitness = fitness
+        self.clusters = clusters
+
 class PSO_Clusterizer():
 
     @staticmethod
@@ -49,7 +56,7 @@ class PSO_Clusterizer():
         #create temporary euclidean dist representation
         eDist=np.zeros((no_data, no_clusters))
         tmpAsign = np.zeros((no_data, 1))
-        print "Created %d, %d dimensional particles of %d clusters (%d dimensional problem)" % (no_particles, no_dims, no_clusters, no_dims * no_clusters)
+        logger.info("Created %d, %d dimensional particles of %d clusters (%d dimensional problem)" % (no_particles, no_dims, no_clusters, no_dims * no_clusters))
 
         ##Particle temporary parameters
         #particle weight w
@@ -69,7 +76,7 @@ class PSO_Clusterizer():
         no_stalls=0
         # Main loop algorithm iteration:
         for iteration in xrange(t_max):
-            print "Iteration %d/%d" % (iteration, t_max)
+            logger.debug("Iteration %d/%d" % (iteration, t_max))
 
             for i in xrange(no_particles):
                 particle = particles[i,:,:]
@@ -105,14 +112,14 @@ class PSO_Clusterizer():
 
             #update inertia cofficient linearly
             w = 0.4 + float(t_max - iteration)/t_max * 0.5
-            print "Fitness: ", gBest_val
+            logger.debug("Fitness: %s", gBest_val)
             #convergence criteria logic:
             if last_score != float("inf"):
                 pChange = (last_score - gBest_val) / gBest_val
                 if pChange < 0.01:
                     no_stalls += 1
                     if no_stalls > 2:
-                        print "Convergence criteria reached"
+                        logger.info("Convergence criteria reached")
                         break
             last_score=gBest_val
 
@@ -124,12 +131,12 @@ class PSO_Clusterizer():
         result =  np.argmin(eDist, axis=-1)
 
         unique, counts = np.unique(result, return_counts=True)
-        print "Label histogram:"
         rdict = dict(zip(unique, counts))
-        print rdict
-        print "Best Fitness: ", gBest_val
+        logger.info("Label histogram: %s", rdict)
+        logger.info("Best Fitness: %s", gBest_val)
         if no_dims < 10:
             print "\nCluster coordinates:"
             print gBest*(maxVal-minVal) + minVal
         return result, gBest_val, gBest
             #Check end condition
+
