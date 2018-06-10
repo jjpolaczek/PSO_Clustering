@@ -4,10 +4,6 @@ from library import Book, Library
 import logging
 import sys
 from time import time
-from optparse import OptionParser
-
-
-from sklearn.datasets import fetch_20newsgroups
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import HashingVectorizer
@@ -18,12 +14,16 @@ from sklearn.preprocessing import Normalizer
 
 logger = logging.getLogger(__name__)
 
+VECTORIZED_FILE_CHECKPOINT = "feature_vector.pickle"
+LSA_FILE_CHECKPOINT = "lsa_vector.pickle"
+
+
 class TextVectorizer():
     def __init__(self, bookList, opts):
         self.opts=opts
         self.bookList=bookList
-        self.tmpVectorisedFile1 = "vectorised1.pickle"
-        self.tmpVectorisedFile2 = "vectorised2.pickle"
+        self.tmpVectorisedFile1 = VECTORIZED_FILE_CHECKPOINT
+        self.tmpVectorisedFile2 = LSA_FILE_CHECKPOINT
 
     def process(self):
         # Vectorizer settings
@@ -32,7 +32,7 @@ class TextVectorizer():
 
         vectorizer = TfidfVectorizer(max_df=0.5, max_features=self.opts.n_features,
                                          min_df=2, stop_words='english',
-                                         use_idf=self.opts.use_idf)
+                                         use_idf=True)
 
 
         X = vectorizer.fit_transform(self.bookList)

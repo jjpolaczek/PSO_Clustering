@@ -8,6 +8,7 @@ from vectorizer import TextVectorizer
 from clusterizer import PSO_Clusterizer, PSO_Result
 
 from optparse import OptionParser
+from vectorizer import LSA_FILE_CHECKPOINT
 import numpy as np
 import time
 
@@ -26,7 +27,7 @@ def main(opts):
     html_dir_path="./books/indexes"
     library_listing_file="library_listing.pickle"
 
-    with open("vectorised2.pickle", 'rb') as f:
+    with open(LSA_FILE_CHECKPOINT, 'rb') as f:
         obj = pickle.load(f)
 
     englishBooks, featureVector = obj

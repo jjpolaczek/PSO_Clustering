@@ -335,7 +335,9 @@ class Library:
                 tmpBooklist.append(b)
         logger.info("Dropped %d books due to invalid file content", len(self.bookList) - len(tmpBooklist))
         self.bookList=tmpBooklist
-
+    @staticmethod
+    def checkBookFolder(path):
+        return os.path.isdir(path)
 #Can accept a list of languages or asingle language
     def filterBooks(self, language=None, onlyWithSubject=False):
         filteredList=[]

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+#workon einis
 
 #for ((i=$1;i<=$2;i++)); do
 #    echo `python textClusterize.py --clusters=$i --no-retries=3`
@@ -23,12 +23,13 @@ run_with_lock(){
     )&
 }
 task(){
-    python textClusterize.py --clusters="$i" --no-retries=3
-   #sleep 0.5; echo "$1";
+   /home/kuba/.virtualenvs/einis/bin/python2.7 textClusterize.py --clusters="$i" --no-retries=1
+   #sleep 0.5; echo "$i";
 }
-N=6
+N=1
 open_sem $N
 for ((i=$1;i<=$2;i++)); do
-    run_with_lock task $i
+    task $i
+    #run_with_lock task $i
     #run_with_lock echo `python textClusterize.py --clusters=$i --no-retries=3 &`
 done

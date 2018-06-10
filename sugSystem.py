@@ -2,6 +2,7 @@ import cPickle as pickle
 import os
 from library import Book, Library
 from clusterizer import PSO_Clusterizer, PSO_Result
+from vectorizer import LSA_FILE_CHECKPOINT
 import re
 import numpy as np
 import matplotlib.pyplot as plt
@@ -72,22 +73,22 @@ def checkFitness():
     plt.ylabel("Fitness")
     #plt.show()
     # Selected 25 clusters for optimal clustering
+
 class SuggestionSystem():
     def __init__(self, cluster_count):
         self.clusterCount = cluster_count
-        loadSuccess = False
-        with open(os.path.join("PSO_results",  "PSO_result_c%d.pickle" % self.clusterCount), 'r') as f:
-            result = pickle.load(f)
+        result = PSO_Clusterizer.loadClustering(cluster_count)
+        if result is not None:
             self.clusters = result.clusters
             self.labels = result.labels
             self.fitness = result.fitness
             print "Loaded %d clusters" % self.clusterCount
-            loadSuccess = True
-        if not loadSuccess:
+        else:
             raise IOError("No file found for %d clusters" % self.clusterCount)
+
         loadSuccess = False
         #Now open the book database
-        with open("vectorised2.pickle", 'rb') as f:
+        with open(LSA_FILE_CHECKPOINT, 'rb') as f:
             obj = pickle.load(f)
             self.englishBooks, featureVector = obj
             print "Loaded %d books" % len(self.englishBooks)
@@ -95,7 +96,26 @@ class SuggestionSystem():
                 raise IOError("Invalid clustering - label count different from book count")
             loadSuccess = True
         if not loadSuccess:
-            raise IOError("No file found for library listing %s" % "vectorised2.pickle")
+            raise IOError("No file found for library listing %s" % LSA_FILE_CHECKPOINT)
+    @staticmethod
+    def checkCheckpoint(clusterCount):
+        result = PSO_Clusterizer.loadClustering(clusterCount)
+        if result is not None:
+            labels = result.labels
+        else:
+            return False
+        loadSuccess = False
+        if not os.path.exists(LSA_FILE_CHECKPOINT):
+            return False
+        #Now open the book database
+        with open(LSA_FILE_CHECKPOINT, 'rb') as f:
+            obj = pickle.load(f)
+            englishBooks, featureVector = obj
+            if len(englishBooks) != len(labels):
+                return False
+            loadSuccess = True
+
+        return loadSuccess
 
     def testDistribution(self):
         bags = []
@@ -145,17 +165,21 @@ class SuggestionSystem():
                 return idx
         return None
 
-    def _findSuggestions(self, index):
+    def _findSuggestions(self, index, sugCount=5):
         clusterNo = self.labels[index]
 
         members = []
         for idx, label in enumerate(self.labels):
             if label == clusterNo:
                 members.append(idx)
-        suggestion = random.sample(members, 15)
+
+        if sugCount > len(members):
+            print "Max number of suggestions reached, printing maximum of %d" % len(members)
+            sugCount = len(members)
+        suggestion = random.sample(members, sugCount)
 
         for number, idx in enumerate(suggestion):
-            print "\n****************SUGGESTION %d****************" % number
+            print "\n****************SUGGESTION %d****************" % (number + 1)
             print self.englishBooks[idx].description()
 
             #print self.englishBooks[idx].title.replace("\n", " ")
@@ -167,13 +191,30 @@ class SuggestionSystem():
             line = raw_input('Enter book title ("exit" or "quit" to quit): ')
             if line == 'exit' or line == 'quit' or line =='q':
                 break
-            print 'ENTERED: "%s"' % line
+           # print 'ENTERED: "%s"' % line
             index = self._findBook(line)
             if index is not None:
+                print "Found book \"%s\"\n" % line
                 print self.englishBooks[index].description()
                 print "Cluster %d" % self.labels[index]
-            self._findSuggestions(index)
+                readline.parse_and_bind('tab: self-insert')
+                while True:
+                    line = raw_input('Enter number of suggestions: ')
+                    try:
+                        numSug = int(line)
+                        if numSug < 0 or numSug > 100:
+                            raise AttributeError()
+                        self._findSuggestions(index, numSug)
+                        print "\n\n"
+                        break
+                    except ValueError:
+                        print "Could not parse %s as integer, retry." % line
+                    except AttributeError:
+                        print "Suggestion count %s out of range, retry." % line
 
+                readline.parse_and_bind('tab: complete')
+            else:
+                print "Did not find book \"%s\"" % line
 
 if __name__ == '__main__':
     iis = SuggestionSystem(20)

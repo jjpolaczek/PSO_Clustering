@@ -5,6 +5,8 @@ import logging
 import time
 logger = logging.getLogger(__name__)
 
+PSO_RESULT_FILE_TEMPLATE = "PSO_result_c%d.pickle"
+PSO_RESULT_FOLDER = "PSO_results"
 
 class PSO_Result():
     def __init__(self, labels, fitness, clusters):
@@ -140,3 +142,17 @@ class PSO_Clusterizer():
         return result, gBest_val, gBest
             #Check end condition
 
+    @staticmethod
+    def saveClustering(labels, fitness, clusters):
+            result = PSO_Result(labels,fitness,clusters)
+            if not os.path.exists(PSO_RESULT_FOLDER):
+                os.makedirs(PSO_RESULT_FOLDER)
+            with open(os.path.join(PSO_RESULT_FOLDER, PSO_RESULT_FILE_TEMPLATE % clusters.shape[0]), 'wb') as f:
+                pickle.dump(result, f, pickle.HIGHEST_PROTOCOL)
+    @staticmethod
+    def loadClustering(no_clusters):
+        if os.path.exists(os.path.join(PSO_RESULT_FOLDER, PSO_RESULT_FILE_TEMPLATE %  no_clusters)):
+            with open(os.path.join(PSO_RESULT_FOLDER, PSO_RESULT_FILE_TEMPLATE %  no_clusters), 'rb') as f:
+                return pickle.load(f)
+        else:
+            return None
