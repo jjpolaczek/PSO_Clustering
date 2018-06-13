@@ -41,7 +41,7 @@ class PSO_Clusterizer():
         fitness /= no_clusters
         return fitness
     @staticmethod
-    def clusterize(dataset, no_clusters, t_max=10, no_particles=None):
+    def clusterize(dataset, no_clusters, t_max=10, no_particles=None, w=0.6, c1=0.4, c2=0.4):
         np.random.seed()
         no_dims = dataset.shape[1]
         no_data = dataset.shape[0]
@@ -62,11 +62,8 @@ class PSO_Clusterizer():
 
         ##Particle temporary parameters
         #particle weight w
-        w = 0.9
-        # individual coefficient (local)
-        c1=0.6
-        # social coefficient (global)
-        c2=0.5
+        # individual coefficient (local)c1
+        # social coefficient (global)c2
         prevV=np.zeros((no_particles, no_clusters, no_dims))
         pBest=np.zeros((no_particles, no_clusters, no_dims))
         pBest_val = no_particles * [float("inf")]

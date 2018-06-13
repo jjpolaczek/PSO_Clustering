@@ -11,7 +11,7 @@ import numpy as np
 import time
 
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +28,28 @@ def testSimple():
         clusters[i,:] = np.array([4,4,4]) +  np.random.rand(1,3) * 0.1
 
     result = PSO_Clusterizer.clusterize(clusters, no_clusters=4, t_max=100)
+    print "Test 2"
+    clusters = np.zeros((100, 2))
+    for i in range(0, 25, 1):
+        clusters[i, :] = np.array([1, 1]) + np.random.rand(1, 2) * 0.6
+    for i in range(25, 50, 1):
+        clusters[i, :] = np.array([2, 2]) + np.random.rand(1, 2) * 0.6
+    for i in range(50, 75, 1):
+        clusters[i, :] = np.array([3, 3]) + np.random.rand(1, 2) * 0.6
+    for i in range(75, 100, 1):
+        clusters[i, :] = np.array([4, 4]) + np.random.rand(1, 2) * 0.6
+
+    result = PSO_Clusterizer.clusterize(clusters, no_clusters=4, t_max=100, no_particles=1000)
+    LABEL_COLOR_MAP = {0: 'r',
+                       1: 'k',
+                       2: 'g',
+                       3: 'b'
+    }
+
+    label_color = [LABEL_COLOR_MAP[l] for l in result[0]]
+    plt.scatter(clusters[:,0], clusters[:,1],c=label_color)
+    plt.title("Clusters for synthetic data")
+    plt.show()
     print result
 
 def testHard():
@@ -112,7 +134,7 @@ def testTmp():
 
 
     print "DT: ", time.time()-t0
-#testSimple()
-testHard()
+testSimple()
+#testHard()
 #testTmp()
 #preCluster(1,25)
