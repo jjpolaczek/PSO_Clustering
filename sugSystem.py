@@ -219,3 +219,4 @@ class SuggestionSystem():
 if __name__ == '__main__':
     iis = SuggestionSystem(20)
     iis.mainLoop()
+    iis.testDistribution()

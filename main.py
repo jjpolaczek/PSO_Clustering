@@ -25,7 +25,7 @@ def main(opts):
             logger.error("Cannot reload the library from %s, books not found, has the iso been mounted (mountdb.sh)?",opts.library_path)
         bookLib = Library(opts.library_path, opts.reload_library)
         englishBooks = bookLib.filterBooks("English", onlyWithSubject=True)
-        logger.info("Processing %d books" % len(englishBooks))
+        logger.info("Processing %d books, vectorisation may take over 10 minutes" % len(englishBooks))
         vectoriser = TextVectorizer(englishBooks, opts)
         englishBooks, featureVector = vectoriser.process()
 
@@ -34,6 +34,7 @@ def main(opts):
         labelsStore = []
         fitnessStore = []
         clustersStore = []
+        logger.info("Clustering, may take over an hour for large cluster counts...")
         for retry in range(opts.cluster_retries):
             logger.info("Clustering for %d clusters, attempt %d/%d" % (opts.no_clusters, retry + 1, opts.cluster_retries))
             labels, fit, clst = PSO_Clusterizer.clusterize(featureVector, no_clusters=opts.no_clusters, t_max=20)

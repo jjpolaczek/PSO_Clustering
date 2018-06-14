@@ -291,7 +291,7 @@ class Library:
             with open(path, "r") as fp:
                 parser.feed(fp.read())
 
-        logger.info("Found %d books", len(parser.bookList))
+        logger.info("Found %d books, preparing to parse contents...", len(parser.bookList))
 
         tmpBookList = parser.bookList
         self.bookList = []
